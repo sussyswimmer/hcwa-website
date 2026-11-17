@@ -123,9 +123,11 @@ test("GPU memory with every texture counted stays inside 48 MB on both tiers at 
   assert.equal(+BAKED_MB.toFixed(2), 2.67);
   const was = [globalThis.devicePixelRatio, globalThis.innerWidth, globalThis.innerHeight];
   try {
-    for (const [w, h, dpr] of [[390, 844, 2], [390, 844, 3], [1440, 900, 1], [1440, 900, 2], [1920, 1080, 1], [1280, 720, 2], [1024, 768, 2], [2560, 1440, 1]]) for (const tier of [1, 2]) {
-      globalThis.devicePixelRatio = dpr;
-      const msaa = tier >= 2 && w * h <= MSAA_PIXELS;
+    const { wantsMsaa } = await import("../src/world/tiers.js");
+    for (const [w, h, dpr] of [[390, 844, 2], [390, 844, 3], [1440, 900, 1], [1440, 900, 2], [1920, 1080, 1], [1280, 720, 2], [1024, 768, 2], [1000, 600, 2], [2560, 1440, 1]]) for (const tier of [1, 2]) {
+      [globalThis.devicePixelRatio, globalThis.innerWidth, globalThis.innerHeight] = [dpr, w, h];
+      const msaa = wantsMsaa(tier, false);
+      assert.ok(!msaa || MSAA_PIXELS >= w * h * Math.min(dpr, 1.5) ** 2, `${w}x${h}@${dpr}: MSAA only where it renders at DPR 1.5`);
       const d = dprFor(w, h, tier, false, msaa), cw = Math.round(w * d), ch = Math.round(h * d);
       const p = planTextures({ tier, width: w, cw, ch, msaa });
       const total = buffersMB(cw, ch, msaa) + shaftMB(cw, ch, tier) + BAKED_MB + wallsMB(p.walls) + atlasMB(p.atlas) + gachMB(p.gach);

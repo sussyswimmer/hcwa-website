@@ -1,0 +1,163 @@
+/* M11 scroll layer (Maxwell, 17 Nov 2026: "I dont like how bland they are and i need more scroll effects and
+   animations when moving through"; intensity: bold). Owner: page stream.
+
+   Everything here follows the scroll, CSS scroll-driven (animation-timeline: view()), on the compositor: no JS, no GSAP
+   on inner pages (M8 long-task budget), native scroll speed, nothing pinned. Rules kept from 05-DESIGN D5:
+   - Only transform, scale, translate and decorative opacity move. Text is never faded by the scroll: words are fully
+     there at every scroll position (the JS reveals keep their own 520 ms fade, on the separate `translate` property).
+   - Never animated: the H1, impact numbers (.count__value), amounts, forms. The figures' tiles move; the figures do not.
+   - Light is light: every patch and bar is a feathered sun token, never a hard line (D0.5).
+   - Off under reduced motion and under "Pause motion" (data-motion="off"): every page is at rest, complete and readable.
+     Browsers without scroll-driven animations (Firefox today) see the rest frame. */
+
+@supports (animation-timeline: view()) {
+@media (prefers-reduced-motion: no-preference) {
+
+/* ------------------------------------------------------------------------------------------------------------------
+   1. Section titles: a feathered bar of sun wipes in under the words as the heading comes up the screen.
+   A block after the heading's own line (no positioning, so a sticky title stays sticky); it is always laid out, so
+   nothing shifts when it grows. Inside the rise clip (motion.css: -0.28em below the line). */
+html[data-motion="on"] :is(.ways__title, .faq__title, .counts--page .counts__title, .change__title, .docs__title,
+  .clear__title, .years__title, .news-feature__title, .news .wall__title)::after {
+  content: ""; display: block; width: min(5.5em, 100%); height: 0.11em; margin-top: 0.14em; border-radius: 1em;
+  background: linear-gradient(to right, color-mix(in oklab, var(--color-sun-400) 0%, transparent), var(--color-sun-400) 14%,
+    var(--color-sun-300) 62%, color-mix(in oklab, var(--color-sun-300) 0%, transparent));
+  transform-origin: 0 50%;
+  animation: fx-bar cubic-bezier(0.16, 1, 0.3, 1) both; animation-timeline: view(); animation-range: entry 60% cover 42%;
+}
+html[data-motion="on"] .faq__title::after { width: min(3.4em, 100%); }
+@keyframes fx-bar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* ------------------------------------------------------------------------------------------------------------------
+   2. Cascades: cards, rows and columns climb into place from below, tilted a little, and settle as they come fully on
+   screen. A row's siblings start a beat apart (--fx-i), so a row arrives left to right. Transform only. */
+html[data-motion="on"] :is(.way, .dated, .doc, .faq__list > *, .feature, .clear__links > li, .count, .years__scroll) {
+  animation: fx-rise cubic-bezier(0.16, 1, 0.3, 1) both; animation-timeline: view();
+  animation-range: entry calc(var(--fx-i, 0) * 9%) cover calc(30% + var(--fx-i, 0) * 5%);
+}
+html[data-motion="on"] :is(.way, .clear__links > li, .count):nth-child(4n + 2),
+html[data-motion="on"] .dated:nth-child(2) { --fx-i: 1; }
+html[data-motion="on"] :is(.way, .clear__links > li, .count):nth-child(4n + 3),
+html[data-motion="on"] .dated:nth-child(3) { --fx-i: 2; }
+html[data-motion="on"] :is(.way, .count):nth-child(4n + 4) { --fx-i: 3; }
+/* Alternate sides tilt in from opposite directions (cards hanging on the same wall). */
+html[data-motion="on"] :is(.way, .count, .faq__list > *):nth-child(odd) { --fx-r: -2.5deg; }
+html[data-motion="on"] :is(.way, .count, .faq__list > *):nth-child(even) { --fx-r: 2deg; }
+@keyframes fx-rise {
+  from { transform: translateY(var(--fx-y, 96px)) rotate(var(--fx-r, 0deg)) scale(0.94); }
+  to { transform: none; }
+}
+/* The news rows slide in along their date line rather than up: the date leads, the title follows. */
+html[data-motion="on"] .dated { --fx-y: 56px; }
+html[data-motion="on"] .dated .dated__date { animation: fx-lead cubic-bezier(0.16, 1, 0.3, 1) both; animation-timeline: view(); animation-range: entry 0% cover 36%; }
+@keyframes fx-lead { from { transform: translateX(-72px); } to { transform: none; } }
+
+/* ------------------------------------------------------------------------------------------------------------------
+   3. Pictures with depth: the world's stills inside the story frames zoom slowly back and drift against the page
+   (the frame holds still, its picture moves: the frame's overflow and feathered mask keep every edge soft). */
+html[data-motion="on"] .feature__wall > * {
+  animation: fx-depth linear both; animation-timeline: view(); animation-range: cover 0% cover 100%; transform-origin: 60% 40%;
+}
+@keyframes fx-depth { from { transform: translateY(-7%) scale(1.26); } to { transform: translateY(7%) scale(1.04); } }
+
+/* Lit headers: the camera pushes into the room's light as the header leaves. The image carries its own feathered mask,
+   so it zooms about its bottom edge: that edge (where the header blends into the day) never moves, and the lattice
+   grows up and away behind the words. A translate here pushed the feather under the day's background and cut a line.
+   The words, and the H1, stay where the page puts them. Not Contact: its gate stage (openings.css) moves this layer. */
+html[data-motion="on"] .lit-head:not(.s3d--contact .lit-head) .lit-head__media .lit {
+  animation: fx-head linear both; animation-timeline: view(); animation-range: exit 0% exit 100%; transform-origin: 72% 100%;
+}
+@keyframes fx-head { to { transform: scale(1.24); } }
+/* The zoom grows sideways past the screen: clip the header on x only (no page scrollbar, the vertical feather untouched). */
+html[data-motion="on"] .lit-head:not(.s3d--contact .lit-head) { overflow-x: clip; }
+
+/* ------------------------------------------------------------------------------------------------------------------
+   4. The day's own light: a field of Hoa thị sun, cast through a screen somewhere above the page, drifts down and
+   across each inner page as it scrolls, in the margins and over the plaster (behind everything, under the words'
+   contrast budget: sun-300 at 0.3 over sun-100 keeps ink-900 above 12:1). */
+html[data-motion="on"] :is(.day--impact, .day--involve, .day--news) { isolation: isolate; }
+html[data-motion="on"] :is(.day--impact, .day--involve, .day--news)::after {
+  content: ""; position: absolute; z-index: -1; pointer-events: none;
+  top: 0; right: -14vw; width: min(64vw, 920px); height: min(110svh, 980px);
+  background: var(--color-sun-300); opacity: 0.32;
+  mask: url("/svg/hole-hoa-thi.svg") 0 0 / 124px 124px repeat, radial-gradient(closest-side, black 18%, rgb(0 0 0 / 0.5) 55%, transparent);
+  mask-composite: intersect;
+  animation: fx-field linear both; animation-timeline: view(); animation-range: cover 0% cover 100%;
+}
+/* Down the page and in toward the middle, the pattern sheared by the late sun, turning a few degrees as the sun moves. */
+@keyframes fx-field {
+  from { transform: translate(0, -8%) rotate(-4deg) skewX(-20deg); }
+  to { transform: translate(-30vw, calc(100svh + 40%)) rotate(6deg) skewX(-26deg); }
+}
+/* The home news (in the shade): the same field, smaller, crossing behind the list. */
+html[data-motion="on"] .news { isolation: isolate; }
+html[data-motion="on"] .news::after {
+  content: ""; position: absolute; z-index: 0; pointer-events: none; top: 0; left: 38%; width: min(58vw, 820px); height: 90%;
+  background: var(--color-sun-200); opacity: 0.4;
+  mask: url("/svg/hole-hoa-thi.svg") 0 0 / 112px 112px repeat, radial-gradient(closest-side, black 20%, transparent);
+  mask-composite: intersect;
+  animation: fx-field-news linear both; animation-timeline: view(); animation-range: cover 0% cover 100%;
+}
+@keyframes fx-field-news {
+  from { transform: translate(-28vw, -20%) rotate(-6deg) skewX(-18deg); }
+  to { transform: translate(18vw, 30%) rotate(4deg) skewX(-24deg); }
+}
+
+/* ------------------------------------------------------------------------------------------------------------------
+   5. Get Involved: each way opens like a tile turned into the light. Its gạch tile spins a quarter turn into place, and
+   the patch of sun it stands on grows out of the tile. */
+html[data-motion="on"] .way__tile {
+  animation: fx-tile cubic-bezier(0.16, 1, 0.3, 1) both; animation-timeline: view();
+  animation-range: entry calc(20% + var(--fx-i, 0) * 9%) cover calc(38% + var(--fx-i, 0) * 5%);
+}
+@keyframes fx-tile { from { transform: rotate(-135deg) scale(0.6); } to { transform: none; } }
+html[data-motion="on"] .way::before {
+  transform-origin: 56px 52px;
+  animation: fx-patch cubic-bezier(0.16, 1, 0.3, 1) both; animation-timeline: view();
+  animation-range: entry calc(30% + var(--fx-i, 0) * 9%) cover calc(50% + var(--fx-i, 0) * 5%);
+}
+@keyframes fx-patch { from { transform: scale(0.15); opacity: 0; } to { transform: none; opacity: 1; } }
+/* The window at the top leans back into the wall as the page leaves it (the street keeps its own stage motion). */
+html[data-motion="on"] .gi-window { animation: fx-window linear both; animation-timeline: view(); animation-range: exit 0% exit 100%; }
+@keyframes fx-window { to { transform: translateY(14%) scale(0.92); } }
+
+/* ------------------------------------------------------------------------------------------------------------------
+   6. Impact: every headline figure stands on a gạch tile that turns into place under it, and a band of sun crosses
+   the row of figures as the section passes. The figures themselves never move (they ride their li, which settles in
+   the cascade above with the tile; the value is static text inside it). */
+html[data-motion="on"] .counts--page { position: relative; isolation: isolate; }
+html[data-motion="on"] .counts--page .count { position: relative; isolation: isolate; padding: 18px 0 0 18px; }
+html[data-motion="on"] .counts--page .count::before {
+  content: ""; position: absolute; z-index: -1; left: -30px; top: -26px; width: 156px; aspect-ratio: 1; pointer-events: none;
+  background: var(--color-sun-300); /* ink-900 on sun-300 stays above 10:1 where a figure crosses it */
+  mask: url("/svg/hole-hoa-thi.svg") 50% 50% / 100% 100% no-repeat;
+  animation: fx-count-tile cubic-bezier(0.16, 1, 0.3, 1) both; animation-timeline: view();
+  animation-range: entry calc(30% + var(--fx-i, 0) * 9%) cover calc(48% + var(--fx-i, 0) * 5%);
+}
+@keyframes fx-count-tile { from { transform: rotate(-90deg) scale(0.3); opacity: 0; } to { transform: none; opacity: 1; } }
+html[data-motion="on"] .counts--page::after {
+  content: ""; position: absolute; z-index: -2; inset: 10% -10vw; pointer-events: none;
+  background: linear-gradient(100deg, transparent 30%, color-mix(in oklab, var(--color-sun-200) 70%, transparent) 46%,
+    color-mix(in oklab, var(--color-sun-300) 55%, transparent) 50%, color-mix(in oklab, var(--color-sun-200) 70%, transparent) 54%, transparent 70%);
+  mask-image: linear-gradient(to bottom, transparent, black 25%, black 75%, transparent);
+  animation: fx-band linear both; animation-timeline: view(); animation-range: entry 0% exit 60%;
+}
+@keyframes fx-band { from { transform: translateX(-70%); } to { transform: translateX(70%); } }
+
+/* ------------------------------------------------------------------------------------------------------------------
+   7. News hub: the notices swing on their pins. Bolder than M4's settle: each comes in with its foot lifted further
+   off the wall and turned on its pin, alternate notices the other way, and lands flat. Scale 0.9 at the start keeps the
+   turned corners inside the column; the pin (transform-origin 50% 0) never moves. */
+html.stages[data-motion="on"] .s3d--news .notice { animation-name: fx-notice; }
+html.stages[data-motion="on"] .s3d--news .notice:nth-child(odd) { --fx-r: -5deg; }
+html.stages[data-motion="on"] .s3d--news .notice:nth-child(even) { --fx-r: 4deg; }
+@keyframes fx-notice {
+  from { transform: perspective(900px) rotateX(24deg) rotate(var(--fx-r, 0deg)) scale(0.9); animation-timing-function: cubic-bezier(0.3, 0.1, 0.6, 1); }
+  70% { transform: perspective(900px) rotateX(3deg) rotate(calc(var(--fx-r, 0deg) * -0.12)) scale(0.99); }
+  to { transform: perspective(900px) rotateX(0deg) rotate(0deg) scale(1); }
+}
+/* The house's light on the wall is stronger and travels further (tier 2 still drives its own --s3d-sun drift). */
+html.stages[data-motion="on"] .s3d--news .newswall__light::before { opacity: 0.72; }
+
+} /* prefers-reduced-motion */
+} /* @supports */

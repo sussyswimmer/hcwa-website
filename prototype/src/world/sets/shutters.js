@@ -137,7 +137,8 @@ export function shuttersScene({ lime, terr, leaf = 104, slat = 65, t = null, ful
     // M6/M7 ("the open shutters look out onto a blank cream void"): the street pales only a little as the light rises,
     // so the shophouses, the tamarind and the pavement keep their shape through the look-out; the flood pales it more
     // (k 0.27 open → 0.15, 0.43 at the flood's peak → 0.26), and the blend into sun-100 does the rest.
-    if (outside.uniforms.uPale) outside.uniforms.uPale.value = Math.min(k * 0.6, 0.3);
+    // M11 (17 Nov: "washed out"): paler by a third of that again (k 0.27 open → 0.06, flood peak → 0.1).
+    if (outside.uniforms.uPale) outside.uniforms.uPale.value = Math.min(k * 0.22, 0.12);
     else {
       outside.uniforms.uLow.value.copy(base.low).lerp(sun100, Math.min(k * 0.8, 0.45));
       outside.uniforms.uHigh.value.copy(base.high).lerp(sun100, Math.min(k * 1.4, 0.8));

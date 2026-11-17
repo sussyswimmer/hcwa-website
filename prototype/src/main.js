@@ -8,6 +8,7 @@ import "./styles/world.css";
 import "./styles/stages.css";
 import "./styles/pages.css";
 import "./styles/openings.css";
+import "./styles/scroll-fx.css";
 import { bus } from "./bus.js";
 import { store } from "./ui/dom.js";
 import { initHeader } from "./ui/header.js";

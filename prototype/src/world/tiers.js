@@ -30,8 +30,11 @@ export const CONTEXT_ATTRS = { alpha: false, depth: true, stencil: false, premul
 // (depth, resolve, display); 4x MSAA adds about 32 more, so only a small drawing buffer can afford it: a window of at
 // most 0.85 M CSS pixels (renderer.js then holds the canvas to 0.85 M pixels whatever the DPR; M7: 1 M at DPR 1.75 was
 // 3 M pixels, 126 MB). Tier 1 renders the SDF screen (its holes are smooth without MSAA) at DPR <= 1.25 and never takes it.
+// M11 (Maxwell, 17 Nov 2026: the shutters "too blurry / washed out"): MSAA only where it still renders at DPR 1.5 or
+// the screen's own DPR if that is lower. On a Retina laptop window (about 1000 x 600) the old rule took MSAA and held
+// the canvas to 0.85 M pixels, so the world drew at DPR 1.2 and was upscaled; without MSAA it supersamples at 1.5-1.75.
 export const canvasPixels = (dpr = globalThis.devicePixelRatio || 1) => Math.round((globalThis.innerWidth || 1) * (globalThis.innerHeight || 1) * dpr * dpr);
-export const wantsMsaa = (tier, poster) => poster || (tier >= 2 && canvasPixels(1) <= MSAA_PIXELS);
+export const wantsMsaa = (tier, poster) => poster || (tier >= 2 && canvasPixels(Math.min(globalThis.devicePixelRatio || 1, 1.5)) <= MSAA_PIXELS);
 
 // Opens the WebGL2 context the renderer will use (attributes, MSAA included, are fixed at creation).
 export function probe(canvas, pageTier, { forced = forcedTier(), poster = false } = {}) {

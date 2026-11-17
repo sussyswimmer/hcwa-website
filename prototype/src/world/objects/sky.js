@@ -266,6 +266,16 @@ export function viewMaterial({ street = STREET_VIEW.street, zc = 0, trunk = -1.4
           float glow = vn(sT.yx * 4.1 + 2.) * .6 + .4 * (1. - smoothstep(G + 5.5, G + 9., sT.x));
           col = mix(col, mix(uLeaf, uLeafLit, glow), leaves);
         }
+        // M11 (Maxwell, 17 Nov 2026: "too blurry / washed out"): the street keeps its inks. A little more colour
+        // (saturation 1.2 about the pixel's own luminance) and depth (gamma 1.1, which only ever darkens, so nothing
+        // passes sun-100), before the late light.
+        col = max(mix(vec3(dot(col, vec3(.2126, .7152, .0722))), col, 1.2), 0.);
+        col = pow(col, vec3(1.1));
+        // M11 (Maxwell, 17 Nov 2026: "too blurry / washed out"): the street keeps its inks. A little more colour
+        // (saturation 1.2 about the pixel's own luminance) and depth (gamma 1.1, which only ever darkens, so nothing
+        // passes sun-100), before the late light.
+        col = max(mix(vec3(dot(col, vec3(.2126, .7152, .0722))), col, 1.2), 0.);
+        col = pow(col, vec3(1.1));
         // The late light washes the whole view toward sun-100 as the exposure rises (the set's setExposure).
         col = mix(col, uSkyHi, uPale);
         gl_FragColor = vec4(col, 1.);

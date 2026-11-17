@@ -12,7 +12,7 @@
     "prebuild": "npm run tokens",
     "build": "vite build",
     "prebuild:pages": "npm run tokens",
-    "build:pages": "vite build --base=/hcwa-rebuild/",
+    "build:pages": "vite build --base=/hcwa-website/",
     "preview": "vite preview",
     "test": "node --test \"test/*.test.mjs\"",
     "check:page": "node scripts/check-page.cjs http://localhost:4173",
@@ -23,7 +23,7 @@
     "check:contrast": "node scripts/light-contrast.mjs http://localhost:4173",
     "check:tiles": "node scripts/check-tiles.cjs http://localhost:4173",
     "check:links": "node scripts/check-links.mjs dist /",
-    "check:links:pages": "node scripts/check-links.mjs dist /hcwa-rebuild/",
+    "check:links:pages": "node scripts/check-links.mjs dist /hcwa-website/",
     "preexport:wp": "npm run tokens",
     "export:wp": "node scripts/export-wp.mjs"
   },
